@@ -1,3 +1,6 @@
 # Environment
 
 venv/
+.env
+.vscode
+.pytest_cache
