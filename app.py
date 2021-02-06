@@ -1,20 +1,21 @@
-from sqlalchemy import create_engine
-import psycopg2
+import os
+
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-import os
+from data_warehouse.db_interactions import *
 
+# Dotenv setup and database info
 load_dotenv()
 
-USER = 'postgres'  # os.getenv("USER")
+USER = 'postgres'
 PASSWORD = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
 DB1 = os.getenv("DB1")
 DB2 = os.getenv("DB2")
 
-
+# PostgreSQL engine setup and database connection
 engine = create_engine(
     f'postgresql://{USER}:{PASSWORD}@localhost:{PORT}/{DB1}')
 engine_dataset = create_engine(
@@ -22,43 +23,8 @@ engine_dataset = create_engine(
 engine.execute(
     "CREATE TABLE IF NOT EXISTS records (name text PRIMARY KEY, details text[])")
 
-
-def write_record(name, details, engine):
-    engine.execute(
-        "INSERT INTO records (name,details) VALUES ('%s','%s')" % (name, details))
-
-
-def read_record(field, name, engine):
-    result = engine.execute(
-        "SELECT %s FROM records WHERE name = '%s'" % (field, name))
-    return result.first()[0]
-
-
-def update_record(field, name, new_value, engine):
-    engine.execute("UPDATE records SET %s = '%s' WHERE name = '%s'" %
-                   (field, new_value, name))
-
-
-def write_dataset(name, dataset, engine):
-    dataset.to_sql('%s' % (name), engine, index=False,
-                   if_exists='replace', chunksize=1000)
-
-
-def read_dataset(name, engine):
-    try:
-        dataset = pd.read_sql_table(name, engine)
-    except:
-        dataset = pd.DataFrame([])
-    return dataset
-
-
-def list_datasets(engine):
-    datasets = engine.execute(
-        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;")
-    return datasets.fetchall()
-
-
-st.title('Dashboard')
+# Streamlit Browser Application
+st.title('Sample Dashboard')
 column_1, column_2 = st.beta_columns(2)
 
 with column_1:
